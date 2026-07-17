@@ -15,4 +15,5 @@ LABEL org.opencontainers.image.title="vyges-yosys" \
       com.vyges.tool="yosys" \
       com.vyges.tool.version="${VERSION}" \
       com.vyges.tool.kind="backing-tool" \
-      com.vyges.tool.invoke="yosys"
+      com.vyges.tool.invoke="yosys" \
+      com.vyges.tool.descriptor="/opt/vyges-yosys/vyges-tool.json"

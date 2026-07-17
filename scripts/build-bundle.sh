@@ -46,6 +46,27 @@ D="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 export PATH="$D/bin:$PATH"
 EOS
 
+# MCP-friendly MULTI-COMPONENT tool descriptor (yosys + yosys-abc + OpenSTA) so the
+# vyges resolve/MCP (Loom) layer can discover + invoke each tool in this bundle.
+cat > "$B/vyges-tool.json" <<TOOLJSON
+{
+  "schema": "vyges-tool-descriptor/1.1",
+  "tool": "yosys",
+  "version": "${VERSION}",
+  "kind": "backing-tool",
+  "headless": true,
+  "components": [
+    { "name": "yosys",     "kind": "synthesis",     "invoke": "yosys",     "provides": ["rtl-synthesis", "read-verilog", "read-liberty", "write-json"] },
+    { "name": "yosys-abc", "kind": "tech-mapper",   "invoke": "yosys-abc", "provides": ["logic-optimization", "technology-mapping"] },
+    { "name": "sta",       "kind": "static-timing", "invoke": "sta",       "provides": ["static-timing-analysis", "read-spef", "read-sdc"] }
+  ],
+  "provides": ["rtl-synthesis", "technology-mapping", "static-timing-analysis"],
+  "env": { "required": [], "optional": ["PDK", "PDK_ROOT"] },
+  "license": "ISC (yosys) + GPL-3.0 (OpenSTA)",
+  "upstream_commit": "${SHORT}"
+}
+TOOLJSON
+
 echo "== tarball (THE PRODUCT) =="
 ARCH="$(uname -m)"                      # x86_64 or aarch64 — not hardcoded
 TARBALL="${NAME}-linux-${ARCH}.tar.gz"
