@@ -1,0 +1,7 @@
+vyges-yosys
+Copyright 2026 Vyges (https://vyges.com)
+
+Repository tooling (Dockerfile, scripts, workflows) is Apache-2.0 (see LICENSE).
+CI clones Yosys at the pinned commit (upstream.yaml, recursively) and BUILDS it.
+The built artifact is Yosys (ISC license), shipped as LICENSE.yosys in the bundle.
+Yosys: https://github.com/YosysHQ/yosys

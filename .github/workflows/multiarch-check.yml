@@ -1,0 +1,49 @@
+name: multiarch-check
+
+# Verify Yosys BUILDS + smokes on BOTH linux/amd64 and linux/arm64 (native runners,
+# free on a public repo). No publish. Run before wiring arm64 into release.yml.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    name: build-${{ matrix.arch }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - run: uname -m
+      - name: Read pin
+        id: pin
+        run: |
+          C=$(grep -E '^[[:space:]]*commit:' upstream.yaml | head -1 | sed -E 's/.*commit:[[:space:]]*//; s/[[:space:]]*#.*//; s/"//g')
+          echo "commit=$C" >> "$GITHUB_OUTPUT"
+      - name: Install build deps
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential bison flex libreadline-dev gawk tcl-dev libffi-dev git \
+            pkg-config python3 zlib1g-dev libboost-system-dev libboost-filesystem-dev
+      - name: Clone Yosys (recursive)
+        run: git clone --recursive https://github.com/YosysHQ/yosys /tmp/yosys
+      - name: Build bundle (arch from uname -m)
+        env:
+          YOSYS_COMMIT: ${{ steps.pin.outputs.commit }}
+          VERSION: ci-${{ matrix.arch }}
+          OUT_DIR: ${{ github.workspace }}/dist
+          YOSYS_TREE: /tmp/yosys
+        run: bash scripts/build-bundle.sh
+      - name: Smoke
+        run: |
+          B=$(ls -d dist/vyges-yosys-ci-${{ matrix.arch }}-g* | head -1)
+          bash scripts/smoke.sh "$B"
+      - name: Result
+        run: echo "### ${{ matrix.arch }} yosys build OK" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,18 @@
+# Slim runtime image: the SAME relocatable bundle from scripts/build-bundle.sh on a
+# clean ubuntu:24.04 with only the runtime libs yosys links.
+FROM ubuntu:24.04
+ARG BUNDLE_DIR
+ARG VERSION=dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libreadline8 tcl8.6 libffi8 zlib1g libstdc++6 \
+ && rm -rf /var/lib/apt/lists/*
+COPY ${BUNDLE_DIR} /opt/vyges-yosys
+ENV PATH=/opt/vyges-yosys/bin:$PATH
+RUN yosys --version | head -1
+LABEL org.opencontainers.image.title="vyges-yosys" \
+      org.opencontainers.image.source="https://github.com/vyges-tools/vyges-yosys" \
+      org.opencontainers.image.description="Yosys synthesis, pinned + reproducibly built by Vyges." \
+      com.vyges.tool="yosys" \
+      com.vyges.tool.version="${VERSION}" \
+      com.vyges.tool.kind="backing-tool" \
+      com.vyges.tool.invoke="yosys"
