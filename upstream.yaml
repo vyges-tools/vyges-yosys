@@ -3,16 +3,23 @@
 # Self-contained: CI clones Yosys at `commit` (recursively — abc submodule) and
 # BUILDS it. Yosys runs a continuous-master model with periodic tags, so we pin the
 # exact commit for reproducibility (like OpenROAD). A sync workflow bumps it via PR.
+# This distro bundles the Yosys synthesis stack: yosys + yosys-abc (tech mapping,
+# built with yosys) + OpenSTA (static timing) — a self-contained synth+timing package.
 upstream:
   source: https://github.com/YosysHQ/yosys
   ref: master
   release_tag: "0.66"                                  # human-facing; commit is authoritative
   commit: "86f2ddebc"                                  # yosys 0.66 (short; CI resolves full sha)
-  recurse_submodules: true                             # abc + friends
+  recurse_submodules: true                             # abc is built with yosys (--recursive)
   updated_at: "2026-07-17T00:00:00Z"
 
+opensta:
+  source: https://github.com/parallaxsw/OpenSTA        # canonical maintained OpenSTA
+  ref: "v2.7.0"                                         # pinned release tag
+  # deps: cmake tcl-dev swig bison flex libeigen3-dev zlib1g-dev
+
 license:
-  spdx: ISC                                            # Yosys; shipped with the bundle as LICENSE.yosys
+  spdx: "ISC (yosys) + GPL-3.0 (OpenSTA)"              # each shipped with the bundle
 
 build:
   base_image: ubuntu:24.04
