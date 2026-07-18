@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
             build-essential bison flex libfl-dev libreadline-dev gawk tcl-dev libffi-dev git \
-            pkg-config python3 zlib1g-dev libboost-system-dev libboost-filesystem-dev cmake swig libeigen3-dev
+            pkg-config python3 zlib1g-dev libboost-system-dev libboost-filesystem-dev cmake swig libeigen3-dev autoconf automake libtool
       - name: Clone Yosys (recursive)
         run: |
           git clone --recursive https://github.com/YosysHQ/yosys /tmp/yosys

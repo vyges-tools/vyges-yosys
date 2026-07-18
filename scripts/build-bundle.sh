@@ -22,13 +22,24 @@ make config-gcc
 make -j"$(nproc)" PREFIX="$PREFIX"
 make install PREFIX="$PREFIX"        # installs bin/yosys AND bin/yosys-abc
 
+# --- CUDD (BDD library, required by OpenSTA) ---
+CUDD_TREE="${CUDD_TREE:-/tmp/cudd}"
+echo "== build CUDD =="
+[ -d "$CUDD_TREE/.git" ] || git clone https://github.com/ivmai/cudd "$CUDD_TREE"
+( cd "$CUDD_TREE"
+  autoreconf -fi 2>/dev/null || true
+  ./configure --prefix="$PREFIX" --enable-shared --enable-obj CFLAGS="-fPIC -Wno-error" CXXFLAGS="-fPIC"
+  make -j"$(nproc)"
+  make install )
+
 # --- OpenSTA (static timing) — built + installed into the SAME prefix ---
 OPENSTA_REF="${OPENSTA_REF:-6d3008101339}"
 OPENSTA_TREE="${OPENSTA_TREE:-/tmp/opensta}"
 echo "== build OpenSTA ($OPENSTA_REF) =="
 [ -d "$OPENSTA_TREE/.git" ] || git clone https://github.com/parallaxsw/OpenSTA "$OPENSTA_TREE"
 git -C "$OPENSTA_TREE" checkout -q "$OPENSTA_REF"
-cmake -S "$OPENSTA_TREE" -B "$OPENSTA_TREE/build" -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_BUILD_TYPE=Release
+cmake -S "$OPENSTA_TREE" -B "$OPENSTA_TREE/build" \
+  -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_BUILD_TYPE=Release -DCUDD_DIR="$PREFIX"
 cmake --build "$OPENSTA_TREE/build" -j"$(nproc)"
 cmake --install "$OPENSTA_TREE/build" 2>/dev/null || cp "$OPENSTA_TREE/build/app/sta" "$PREFIX/bin/sta"
 
