@@ -23,7 +23,7 @@ make -j"$(nproc)" PREFIX="$PREFIX"
 make install PREFIX="$PREFIX"        # installs bin/yosys AND bin/yosys-abc
 
 # --- OpenSTA (static timing) — built + installed into the SAME prefix ---
-OPENSTA_REF="${OPENSTA_REF:-v2.7.0}"
+OPENSTA_REF="${OPENSTA_REF:-6d3008101339}"
 OPENSTA_TREE="${OPENSTA_TREE:-/tmp/opensta}"
 echo "== build OpenSTA ($OPENSTA_REF) =="
 [ -d "$OPENSTA_TREE/.git" ] || git clone https://github.com/parallaxsw/OpenSTA "$OPENSTA_TREE"

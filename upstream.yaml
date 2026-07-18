@@ -15,7 +15,7 @@ upstream:
 
 opensta:
   source: https://github.com/parallaxsw/OpenSTA        # canonical maintained OpenSTA
-  ref: "v2.7.0"                                         # pinned release tag
+  ref: "6d3008101339"                                  # pinned commit (parallaxsw OpenSTA has no tags — continuous master)
   # deps: cmake tcl-dev swig bison flex libeigen3-dev zlib1g-dev
 
 license:
