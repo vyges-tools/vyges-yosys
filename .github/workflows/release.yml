@@ -32,7 +32,7 @@ jobs:
     name: build-${{ matrix.arch }}
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Read pin
         id: pin
         run: |
@@ -61,13 +61,13 @@ jobs:
       - name: Smoke
         run: bash scripts/smoke.sh "dist/vyges-yosys-${{ inputs.version }}-g${{ steps.bb.outputs.short }}"
       - name: Upload tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tarball-${{ matrix.arch }}
           path: dist/*.tar.gz
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+        uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -88,29 +88,29 @@ jobs:
           mkdir -p /tmp/digests && touch "/tmp/digests/${DIGEST#sha256:}"
           echo "SHORT=${SHORT}" > /tmp/short.env
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digest-${{ matrix.arch }}
           path: /tmp/digests/*
           if-no-files-found: error
       - name: Upload short marker
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: short, path: /tmp/short.env }
 
   publish:
     needs: build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { path: dist, pattern: tarball-*, merge-multiple: true }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { path: /tmp/digests, pattern: digest-*, merge-multiple: true }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: short, path: /tmp }
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+        uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -126,7 +126,7 @@ jobs:
           done
           docker buildx imagetools inspect "${IMG}:${VERSION}"
       - name: Publish GitHub Release (both-arch tarballs)
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ inputs.version }}
           name: vyges-yosys ${{ inputs.version }}
